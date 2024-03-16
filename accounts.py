@@ -131,15 +131,3 @@ class Accounts:
             st[i] = l
         return st
 
-
-"""
-fir = Accounts("anangamer", "top secret", "HelloCont1")
-for ke, v in fir.storage.items():
-    print(ke, ": ", v, sep="")
-print()
-for ke, v in fir.sortby(0).items():
-    print(ke, ":", v)
-print()
-for ke, v in fir.filterby(0, "reDdiT").items():
-    print(ke, ":", v)
-"""

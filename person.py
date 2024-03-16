@@ -55,7 +55,3 @@ class Person:
         else:
             raise FileExistsError("Before delete account, delete all containers: {}".format(self.containerlist))
 
-
-"""
-pers = Person("esstee", "HelloWorld")
-print(pers)"""
