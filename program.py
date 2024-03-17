@@ -50,7 +50,7 @@ class MyApp(Window):
         # self.struct.username = 'admin'
 
         self.un = tk.StringVar(value=self.struct.username)
-        self.pw1 = tk.StringVar()  # value='1234567')
+        self.pw1 = tk.StringVar()  # value='password')
         self.pw2 = False
 
         self.signup_login_menu()
@@ -270,8 +270,8 @@ class MyApp(Window):
                 bd = self.struct.cont.delete_cont()  # boolen delete
                 if bd:
                     print("Deleted the container called '{}' with success!".format(self.struct.cont_name))
-                    self.mframe.pack_forget()
-                    self.signup_login_menu()
+                    self.cframe.pack_forget()
+                    self.main_menu()
                     Messagebox.show_info(
                         'Container: "{}" is deleted! Quitting main menu.'.format(self.struct.cont_name), 'Deleted!')
                     self.struct.auth.containerlist = self.struct.auth.load_containerlist()

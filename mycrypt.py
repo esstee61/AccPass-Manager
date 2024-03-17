@@ -14,7 +14,7 @@ def createmainkeysalt():  # new main key
                      length=32,
                      salt=salt,
                      iterations=480000)
-    main_key = urlsafe_b64encode(kdf.derive("umEXCm2v".encode()))
+    main_key = urlsafe_b64encode(kdf.derive("AOY4bh0kk7Sh".encode()))
     fer = Fernet(main_key)
     salt = fer.encrypt(salt)
     try:
@@ -160,4 +160,3 @@ def encrypt_dict(un, pw, dic):
     dic = fer.encrypt(dic)
     salt = fer.encrypt(salt)
     return un.decode(), pw + b"\n" + salt, dic
-
