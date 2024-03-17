@@ -63,7 +63,6 @@ class Main:
             print("_____Save Your Accounts and Theirs Informations With Security_____")
             print("____Sign up____")
             print("--exit-Q")
-            print("<=> You cannot change your username once you signed up!")
 
             self.personname = self.inp_personname()  # take username
             if not self.personname:
@@ -214,7 +213,7 @@ class Main:
                 print(enfn, defn)
                 print(self.personname, newname)
                 newun = defn.replace(self.personname, newname)
-                rename('encrypted/' + enfn, encrypt_pw(newun, self.password, False)[0] + ".key")
+                rename('encrypted/' + enfn, 'encrypted/' + encrypt_pw(newun, self.password, False)[0] + ".key")
             self.personname = newname
             self.openingrun = True
             print("Changed username!")
