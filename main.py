@@ -214,7 +214,7 @@ class Main:
                 print(enfn, defn)
                 print(self.personname, newname)
                 newun = defn.replace(self.personname, newname)
-                rename(enfn, encrypt_pw(newun, self.password, False)[0] + ".key")
+                rename('encrypted/' + enfn, encrypt_pw(newun, self.password, False)[0] + ".key")
             self.personname = newname
             self.openingrun = True
             print("Changed username!")

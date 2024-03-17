@@ -1,6 +1,5 @@
-import os
 from base64 import urlsafe_b64encode
-from os import urandom, listdir
+from os import urandom, listdir, mkdir
 import json
 import cryptography.fernet
 from cryptography.fernet import Fernet
@@ -22,7 +21,7 @@ def createmainkeysalt():  # new main key
             fi.write(main_key + b"\n" + salt)
     except FileNotFoundError:
         if 'encrypted' not in listdir():
-            os.mkdir('encrypted')
+            mkdir('encrypted')
             createmainkeysalt()
 
 

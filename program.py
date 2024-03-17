@@ -11,6 +11,7 @@ from mycrypt import decryedfilenames, encrypt_pw, matchingun
 
 USERNAME_MIN_LEN = 4
 PASSWORD_MIN_LEN = 7
+ANIMATION_SPEED = 1
 
 
 def check_invalid_char(x, pw=False):
@@ -45,57 +46,54 @@ class MyApp(Window):
         self.mframe = None
         self.signup_login_frame = None
         self.iconbitmap(icon)
+        self.after(20, lambda: self.title('AccPass Manager - Welcome'))
         self.struct = Struct()
 
         # self.struct.username = 'admin'
 
         self.un = tk.StringVar(value=self.struct.username)
-        self.pw1 = tk.StringVar()  # value='password')
+        self.pw1 = tk.StringVar()  # value='1234567')
         self.pw2 = False
 
         self.signup_login_menu()
-
-        self.after(1000, self.print_window_size)
-
         self.mainloop()
 
-    def container_menu(self):
+    def container_menu(self):  # TODO messagebox.yesnocancel check unsaved progress when closing window
         side_on = False
 
         def side_menu():
-            settings_btn.configure(state='disabled')
             nonlocal side_on
+            settings_btn.configure(state='disabled')
             fto = (0.765, 0.9)
-            sfto = ((0.21, -0.1),  # rel x
-                    (0.888, 0.24),  # rel h
-                    (0.208, 0.1),  # rel w
-                    (0.085, 0.36))  # rel y
-            steps = 56
+            sfto = ((0.21, -0.02),  # rel x
+                    (0.888, 0.26),  # rel h
+                    (0.208, 0.08),  # rel w
+                    (0.085, 0.4))  # rel y
+            steps = 56 * ANIMATION_SPEED
 
             def animate(step):
-                if not side_on:
-                    frame.place_configure(relwidth=fto[0] + (fto[1] - fto[0]) * (step + 1) / steps)
-                    side_frame.place_configure(relx=sfto[0][0] + (sfto[0][1] - sfto[0][0]) * (step + 1) / steps,
-                                               relheight=sfto[1][0] + (sfto[1][1] - sfto[1][0]) * (step + 1) / steps,
-                                               relwidth=sfto[2][0] + (sfto[2][1] - sfto[2][0]) * (step + 1) / steps,
-                                               rely=sfto[3][0] + (sfto[3][1] - sfto[3][0]) * (step + 1) / steps)
+                nonlocal side_on
+                if side_on:
+                    frame.place_configure(relwidth=fto[0] + (fto[1] - fto[0]) * (step) / steps)
+                    side_frame.place_configure(relx=sfto[0][0] + (sfto[0][1] - sfto[0][0]) * (step) / steps,
+                                               relheight=sfto[1][0] + (sfto[1][1] - sfto[1][0]) * (step) / steps,
+                                               relwidth=sfto[2][0] + (sfto[2][1] - sfto[2][0]) * (step) / steps,
+                                               rely=sfto[3][0] + (sfto[3][1] - sfto[3][0]) * (step) / steps)
                 else:
                     frame.place_configure(relwidth=fto[1] - (fto[1] - fto[0]) * (step + 1) / steps)
-                    side_frame.place_configure(relx=sfto[0][1] - (sfto[0][1] - sfto[0][0]) * (step + 1) / steps,
-                                               relheight=sfto[1][1] - (sfto[1][1] - sfto[1][0]) * (step + 1) / steps,
-                                               relwidth=sfto[2][1] - (sfto[2][1] - sfto[2][0]) * (step + 1) / steps,
-                                               rely=sfto[3][1] - (sfto[3][1] - sfto[3][0]) * (step + 1) / steps)
+                    side_frame.place_configure(relx=sfto[0][1] - (sfto[0][1] - sfto[0][0]) * (step) / steps,
+                                               relheight=sfto[1][1] - (sfto[1][1] - sfto[1][0]) * (step) / steps,
+                                               relwidth=sfto[2][1] - (sfto[2][1] - sfto[2][0]) * (step) / steps,
+                                               rely=sfto[3][1] - (sfto[3][1] - sfto[3][0]) * (step) / steps)
                 if step < steps:
                     if step == 0:
                         self.mframe.after(0, animate, step + 1)
                     else:
-
-                        self.mframe.after(10, animate, step + 1)
+                        self.mframe.after(4, animate, step + 1)
                 else:
+                    side_on = not side_on
                     settings_btn.configure(state='normal')
-
-            animate(0)
-            side_on = not side_on
+            animate(1)
 
         def auto_fit():
             table.autofit_columns()
@@ -247,6 +245,7 @@ class MyApp(Window):
             self.struct.cont.rename_cont(self.pw2)
             print("Renamed the container '{}' to '{}'".format(self.struct.cont_name, self.pw2))
             self.struct.cont_name = self.pw2
+            menu_label.configure(text=self.struct.username + ' - ' + self.struct.cont_name)
             self.struct.cont_is_saved = False
             Messagebox.show_info('Container renamed successfully! Dont forget to save.', 'Changed Name')
 
@@ -270,11 +269,11 @@ class MyApp(Window):
                 bd = self.struct.cont.delete_cont()  # boolen delete
                 if bd:
                     print("Deleted the container called '{}' with success!".format(self.struct.cont_name))
+                    self.struct.auth.containerlist = self.struct.auth.load_containerlist()
                     self.cframe.pack_forget()
                     self.main_menu()
                     Messagebox.show_info(
                         'Container: "{}" is deleted! Quitting main menu.'.format(self.struct.cont_name), 'Deleted!')
-                    self.struct.auth.containerlist = self.struct.auth.load_containerlist()
                 else:
                     Messagebox.show_error(title="Wrong Password!", message='[>280<] Invalid password!')
                     return False
@@ -339,13 +338,13 @@ class MyApp(Window):
 
         # side frame
         side_frame = ttk.Frame(self.cframe, relief='solid', style='light')
-        side_frame.place(anchor='ne', relheight=.24, relwidth=.1, rely=.36, relx=-0.1)
+        side_frame.place(anchor='ne', relheight=.26, relwidth=.08, rely=.4, relx=-0.02)
 
         settings_btn = ttk.Button(self.cframe, text='S', style='warning', command=side_menu, cursor='hand2')
-        settings_btn.place(relx=.055, rely=.15, relwidth=.06, relheight=.1, anchor='center')
+        settings_btn.place(relx=.045, rely=.15, relwidth=.06, relheight=.1, anchor='center')
 
         menu_label = ttk.Label(self.cframe, text=self.struct.username + ' - ' + self.struct.cont_name, style='info')
-        menu_label.place(relx=.015, rely=.02)
+        menu_label.place(relx=.012, rely=.02)
 
         quit_btn = ttk.Button(side_frame, text='Q', style='danger', command=quit_cont, cursor='hand2')
         quit_btn.place(relx=.80, rely=.0788, relwidth=.294, relheight=.112, anchor='center')
@@ -356,12 +355,12 @@ class MyApp(Window):
         ch_username_btn = ttk.Button(side_frame, text='Change Name', style='secondary', command=ch_cont_name, cursor='hand2')
         ch_username_btn.place(rely=0.5257, relx=0.1, relheight=0.1, relwidth=0.8)
         
-        ch_password_btn = ttk.Button(side_frame, text='Container Password', style='secondary', command=ch_password, cursor='hand2')
+        ch_password_btn = ttk.Button(side_frame, text='Change Password', style='secondary', command=ch_password, cursor='hand2')
         ch_password_btn.place(rely=0.7127, relx=0.1, relheight=0.1, relwidth=0.8)
 
         # frame
         frame = ttk.Frame(self.cframe, relief='solid')
-        frame.place(relx=.995, rely=.005, relheight=.99, relwidth=.882, anchor='ne')
+        frame.place(relx=.99, rely=.005, relheight=.99, relwidth=.885, anchor='ne')
 
         table = Tableview(frame, bootstyle='dark', coldata=['ID', 'Sitename', 'Email', 'Username', 'Password', 'Note'],
                           searchable=True, paginated=True, pagesize=15)
@@ -370,7 +369,7 @@ class MyApp(Window):
         inner_frame.pack(side='right', fill='both', expand=True)
         table.pack(side='right', fill='both')
 
-        save_btn = ttk.Button(inner_frame, text='Save changes', style='success', command=save_container, cursor='hand2')
+        save_btn = ttk.Button(self.cframe, text='Save changes', style='success', command=save_container, cursor='hand2')
         save_btn.pack(anchor='ne', padx=12, pady=8, ipady=16)
 
         reset_btn = ttk.Button(inner_frame, text='Reset IDs', style='info', command=reset_id, cursor='hand2')
@@ -419,21 +418,22 @@ class MyApp(Window):
             settings_btn.configure(state='disabled')
             nonlocal side_on
             fto = (0.765, 0.9)
-            sfto = ((0.21, -0.1),  # rel x
-                    (0.888, 0.24),  # rel h
-                    (0.208, 0.1),  # rel w
-                    (0.085, 0.36))  # rel y
+            sfto = ((0.21, -0.02),  # rel x
+                    (0.888, 0.26),  # rel h
+                    (0.208, 0.08),  # rel w
+                    (0.085, 0.4))  # rel y
             
             steps = 56
+            sec = 10 * ANIMATION_SPEED
 
             def animate(step):
-                if not side_on:
+                nonlocal side_on
+                if side_on:
                     frame.place_configure(relwidth=fto[0] + (fto[1] - fto[0]) * (step + 1) / steps)
                     side_frame.place_configure(relx=sfto[0][0] + (sfto[0][1] - sfto[0][0]) * (step + 1) / steps,
                                                relheight=sfto[1][0] + (sfto[1][1] - sfto[1][0]) * (step + 1) / steps,
                                                relwidth=sfto[2][0] + (sfto[2][1] - sfto[2][0]) * (step + 1) / steps,
                                                rely=sfto[3][0] + (sfto[3][1] - sfto[3][0]) * (step + 1) / steps)
-
                 else:
                     frame.place_configure(relwidth=fto[1] - (fto[1] - fto[0]) * (step + 1) / steps)
                     side_frame.place_configure(relx=sfto[0][1] - (sfto[0][1] - sfto[0][0]) * (step + 1) / steps,
@@ -445,12 +445,12 @@ class MyApp(Window):
                     if step == 0:
                         self.mframe.after(0, animate, step + 1)
                     else:
-                        self.mframe.after(10, animate, step + 1)
+                        self.mframe.after(sec, animate, step + 1)
                 else:
                     settings_btn.configure(state='normal')
+                    side_on = not side_on
 
             animate(0)
-            side_on = not side_on
 
         def delete_acc():
             self.password_input('Delete Account!',
@@ -475,6 +475,8 @@ class MyApp(Window):
                 try:
                     self.struct.auth.delete_account()
                     print("Deleted the account called '{}'".format(self.struct.username))
+                    self.un.set('')
+                    self.pw1.set('')
                     self.mframe.pack_forget()
                     self.signup_login_menu()
                     Messagebox.show_info('Account is deleted! Quitting login screen.', 'Deleted!')
@@ -546,13 +548,13 @@ class MyApp(Window):
                 print(enfn, defn)
                 print(self.struct.username, new_username)
                 newun = defn.replace(self.struct.username, new_username)
-                rename(enfn, encrypt_pw(newun, self.struct.password, False)[0] + ".key")
+                rename('encrypted/' + enfn, 'encrypted/' +  encrypt_pw(newun, self.struct.password, False)[0] + ".key")
             self.struct.username = new_username
-
             self.mframe.pack_forget()
             print("Changed username!")
             self.signup_login_menu()
             Messagebox.show_info('Username changed sucesfully! Sign in again.', 'Changed!')
+            self.pw1.set('')
 
         def quit_main_menu():
             self.pw1.set('')
@@ -608,13 +610,13 @@ class MyApp(Window):
 
         # side frame
         side_frame = ttk.Frame(self.mframe, relief='solid', style='light')
-        side_frame.place(anchor='ne', relheight=.24, relwidth=.1, rely=.36, relx=-0.1)
+        side_frame.place(anchor='ne', relheight=.26, relwidth=.08, rely=.4, relx=-0.02)
 
         settings_btn = ttk.Button(self.mframe, text='S', style='warning', command=side_menu, cursor='hand2')
         settings_btn.place(relx=.045, rely=.15, relwidth=.06, relheight=.1, anchor='center')
 
         menu_label = ttk.Label(self.mframe, text=self.struct.username, style='info')
-        menu_label.place(relx=.015, rely=.02)
+        menu_label.place(relx=.012, rely=.02)
 
         quit_btn = ttk.Button(side_frame, text='Q', style='danger', command=quit_main_menu, cursor='hand2')
         quit_btn.place(relx=.80, rely=.0788, relwidth=.294, relheight=.112, anchor='center')  # y: start .0394, end .1514 
@@ -657,7 +659,7 @@ class MyApp(Window):
         renew()
 
     def signup_login_menu(self):
-        self.title('AccPass Manager - Welcome')
+        self.title('AccPass Manager - Login')
         self.minsize(325, 130)
         self.geometry('900x520')
         self.signup_login_frame = ttk.Frame(self, relief='solid', borderwidth=120)
@@ -673,6 +675,7 @@ class MyApp(Window):
 
         label2 = ttk.Label(self.signup_login_frame, text='Password')
         entry2 = ttk.Entry(self.signup_login_frame, show='*', textvariable=self.pw1)
+        entry2.bind('<KeyPress-Return>', lambda _: self.login_click())
 
         button1 = ttk.Button(self.signup_login_frame, text='Login', command=self.login_click, cursor='hand2')
         button2 = ttk.Button(self.signup_login_frame, text='Sign up', command=self.signup_click, cursor='hand2')
@@ -741,6 +744,7 @@ class MyApp(Window):
         pw2 = tk.StringVar()
         tl = Toplevel(title=title, minsize=(315, 160), size=(350, 300), maxsize=(600, 400))
         tl.bind('<KeyPress-Return>', btn_click)
+        tl.bind('<KeyRelease-Escape>', lambda _: tl.destroy())
         ttk.Label(tl, text=message).place(anchor='center', relx=.5, rely=0.3)
         ttk.Label(tl, text=label).place(anchor='center', relx=.2, rely=.5)
         e = ttk.Entry(tl, show=show, textvariable=pw2)
@@ -779,7 +783,7 @@ class MyApp(Window):
                 else:
                     Messagebox.show_error(title="Already taken!", message='[>774<] Cannot create account! Username '
                                                                           'has already taken. Try another username.')
-
+'''
     def print_window_size(self, *args):
         if len(args) > 0:
             for i in args:
@@ -789,7 +793,7 @@ class MyApp(Window):
             self.after(8500, lambda: self.print_window_size(*args) if len(args) > 0 else self.print_window_size())
         except tk.TclError:
             print('tclerror prnt window size !')
-
-# TODO option for theme
+'''
+# TODO option for theme + animation speed
 theme = 'litera'
 MyApp('AccPass Manager', theme, size=(900, 520), icon='icon.ico')
